@@ -97,7 +97,7 @@
             tools:layout_editor_absoluteY="517dp" />
 
         <ImageView
-            android:id="@+id/imageView3"
+            android:id="@+id/login_google"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_marginLeft="25dp"

@@ -4,17 +4,28 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -32,10 +43,13 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar myToolbar;
     private ActionBarDrawerToggle actionBarDrawerToggle; // 左上方的三條線，開啟NavigationView
     private FirebaseAuth mAuth;
-    private DatabaseReference user_ref;
+    private DatabaseReference user_ref, post_ref, likes_ref;
     private CircleImageView nav_profile_img; // nav 的 圓形頭像
     private TextView nav_user_full_name; // nav 的 使用者全名
     private ImageButton img_btn_add_new_post;
+    private RecyclerView rec_posts_list;
+    private FirebaseRecyclerAdapter<Post, MyViewHolder> firebaseRecyclerAdapter;
+    private String current_user_id;
 
 
     @Override
@@ -83,8 +97,130 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        // 處理Firebase recycler adapter
+        // ->先創一個FirebaseRecyclerOptions(規定的)
+        FirebaseRecyclerOptions<Post> options = new FirebaseRecyclerOptions.Builder<Post>()
+                .setQuery(post_ref, Post.class)
+                .build();
+        // ->建立FirebaseRecyclerAdapter
+        firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Post, MyViewHolder>(options) {
+            @Override
+            protected void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull Post model) {
+                holder.all_posts_txt_date.setText("  "+model.getDate());
+                holder.all_posts_txt_username.setText((model.getFullname()));
+                holder.all_posts_txt_description.setText(model.getDescription());
+                holder.all_posts_txt_time.setText("  "+model.getTime());
+                Glide.with(MainActivity.this).asBitmap().load(model.getPost_image()).into(holder.all_posts_img_img);
+                Glide.with(MainActivity.this).asBitmap().load(model.getProfile_image()).into(holder.all_posts_circle_img_profile_img);
 
 
+
+                // 這篇貼文在 Firebase 的 key
+                final String post_key = getRef(position).getKey(); // getRef 是 Firebase 內建的方法
+                holder.all_posts_parent.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MainActivity.this, ClickPostActivity.class);
+                        intent.putExtra("post_key", post_key);
+                        startActivity(intent);
+                    }
+                });
+
+                // 這篇貼文在 Firebase 有多少 comment
+                post_ref.child(post_key).child("comment").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists()){
+                            holder.all_posts_txt_numOfComments.setText(String.valueOf(snapshot.getChildrenCount()));
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+
+
+
+                // 取得 Likes 的相關資料 思考邏輯：從firebasedatabase 的 likes_ref 裡看有沒有某 PO文(post_key) 裡有沒有當前使用者id資料在裡面(有代表曾經點過讚)
+                // ，若有則將圖片改成有愛心的，無則相反
+                final boolean[] likeChecker = new boolean[1]; // 設置的參數，用來記錄現在是否有like該貼文
+                likes_ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.child(post_key).hasChild(current_user_id)){
+                            int countLikes = (int)snapshot.child(post_key).getChildrenCount();
+                            holder.all_posts_imgBtn_like.setImageResource(R.drawable.like);
+                            holder.all_posts_txt_numOfLikes.setText(countLikes + " likes");
+                            likeChecker[0] = true;
+                        }else{
+                            int countLikes = (int)snapshot.child(post_key).getChildrenCount();
+                            holder.all_posts_imgBtn_like.setImageResource(R.drawable.dislike);
+                            holder.all_posts_txt_numOfLikes.setText(countLikes + " likes");
+                            likeChecker[0] = false;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                // 按讚按鈕，只要修改雲端資料庫即可，修改後firebasedatabase 會更新資料，整個view會重新渲染，因此不用再設置按讚按鈕的圖片，或是修改likeChecker[0]的數值
+                holder.all_posts_imgBtn_like.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(likeChecker[0]){
+                            likes_ref.child(post_key).child(current_user_id).removeValue();
+
+                        }else{
+                            likes_ref.child(post_key).child(current_user_id).setValue(true);
+
+                        }
+                    }
+                });
+
+            }
+
+            @NonNull
+            @Override
+            public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.all_posts_layout, parent, false);
+                return new MyViewHolder(view);
+            }
+        };
+
+        rec_posts_list.setAdapter(firebaseRecyclerAdapter);
+
+
+
+    }
+    public static class MyViewHolder extends RecyclerView.ViewHolder{
+        CircleImageView all_posts_circle_img_profile_img;
+        TextView all_posts_txt_username, all_posts_txt_date,all_posts_txt_time, all_posts_txt_description, all_posts_txt_numOfLikes, all_posts_txt_numOfComments;
+        ImageView all_posts_img_img;
+        ConstraintLayout all_posts_parent;
+        ImageButton all_posts_imgBtn_like, all_posts_imgBtn_comment;
+
+
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            all_posts_circle_img_profile_img = itemView.findViewById(R.id.all_posts_circle_img_profile_img);
+            all_posts_txt_username = itemView.findViewById(R.id.all_posts_txt_username);
+            all_posts_txt_date = itemView.findViewById(R.id.all_posts_txt_date);
+            all_posts_txt_time = itemView.findViewById(R.id.all_posts_txt_time);
+            all_posts_txt_description = itemView.findViewById(R.id.all_posts_txt_description);
+            all_posts_img_img = itemView.findViewById(R.id.all_posts_img_img);
+            all_posts_parent = itemView.findViewById(R.id.all_post_parent);
+            all_posts_txt_numOfLikes = itemView.findViewById(R.id.all_posts_txt_numOfLikes);
+            all_posts_imgBtn_like = itemView.findViewById(R.id.all_posts_imgBtn_like);
+            all_posts_imgBtn_comment = itemView.findViewById(R.id.all_posts_imgBtn_comment);
+            all_posts_txt_numOfComments = itemView.findViewById(R.id.all_posts_txt_numOfComments);
+        }
     }
 
     @Override
@@ -123,7 +259,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        firebaseRecyclerAdapter.startListening();
+        firebaseRecyclerAdapter.notifyDataSetChanged(); // 可以解決返回頁面時出現的錯誤
+
+
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        firebaseRecyclerAdapter.stopListening();
+
+    }
+
 
     private void initViews(){
         navigationView = findViewById(R.id.navView);
@@ -132,6 +281,18 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         user_ref = FirebaseDatabase.getInstance().getReference().child("Users");
         img_btn_add_new_post = findViewById(R.id.img_btn_add_new_post);
+        post_ref = FirebaseDatabase.getInstance().getReference().child("Posts");
+        likes_ref = FirebaseDatabase.getInstance().getReference().child("Likes");
+        current_user_id = mAuth.getCurrentUser().getUid();
+
+        // recycler view 相關
+        rec_posts_list = findViewById(R.id.all_users_post_list);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setReverseLayout(true); // RecyclerView 會反轉 item 的顯示順序，從最後一個 item 開始顯示。
+        linearLayoutManager.setStackFromEnd(true); // 當新增一個 item 時，RecyclerView 會從底部開始疊加新的 item。
+        // 所以如果你想要讓 RecyclerView 從底部開始疊加新的 item，並且還想要反轉 item 的顯示順序，就需要同時設置這兩個屬性。
+        rec_posts_list.setLayoutManager(linearLayoutManager);
+
 
 
 
@@ -149,7 +310,8 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(post_activity_intent);
                         break;
                     case R.id.nav_profile:
-                        Toast.makeText(MainActivity.this, "Profile", Toast.LENGTH_SHORT).show();
+                        Intent profile_intent = new Intent(MainActivity.this, ProfileActivity.class);
+                        startActivity(profile_intent);
                         break;
                     case R.id.nav_home:
                         Toast.makeText(MainActivity.this, "Home", Toast.LENGTH_SHORT).show();
@@ -158,13 +320,15 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Friends", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.nav_find_friends:
-                        Toast.makeText(MainActivity.this, "Find Friends", Toast.LENGTH_SHORT).show();
+                        Intent find_friends_intent = new Intent(MainActivity.this, FindFriendsActivity.class);
+                        startActivity(find_friends_intent);
                         break;
                     case R.id.nav_messages:
                         Toast.makeText(MainActivity.this, "Messages", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.nav_settings:
-                        Toast.makeText(MainActivity.this, "Settings", Toast.LENGTH_SHORT).show();
+                        Intent settings_intent = new Intent(MainActivity.this, SettingsActivity.class);
+                        startActivity(settings_intent);
                         break;
                     case R.id.nav_logout:
                         mAuth.signOut();
@@ -180,4 +344,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+
 }

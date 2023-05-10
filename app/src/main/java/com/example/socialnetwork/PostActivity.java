@@ -138,6 +138,10 @@ public class PostActivity extends AppCompatActivity {
                                         Toast.makeText(PostActivity.this, "Error occurred:"+task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                     }else{
                                         loadingBar.dismiss();
+                                        Intent intent = new Intent(PostActivity.this, MainActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
+                                        finish();
                                     }
                                 }
                             });
