@@ -78,7 +78,10 @@ public class SettingsActivity extends AppCompatActivity {
                     settings_edt_country.setText(country);
                     settings_edt_dob.setText(dob);
                     settings_edt_profile_name.setText(profile_name);
-                    Glide.with(SettingsActivity.this).asBitmap().load(profile_img_url).into(settings_profile_img);
+                    if(profile_img_url!=null){
+                        Glide.with(SettingsActivity.this).asBitmap().load(profile_img_url).into(settings_profile_img);
+                    }
+
 
                     switch (gender){
                         case "Male":

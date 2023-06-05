@@ -40,7 +40,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class LoginActivity extends AppCompatActivity {
     private Button btn_login;
     private EditText edt_email, edt_password;
-    private TextView txt_createAccountLink;
+    private TextView txt_createAccountLink, txt_resetPasswordLink;
     private FirebaseAuth mAuth;
     private ProgressDialog loadingBar;
     private ImageView login_google;
@@ -147,11 +147,20 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         loadingBar = new ProgressDialog(this);
         login_google = findViewById(R.id.login_google);
+        txt_resetPasswordLink = findViewById(R.id.login_txt_resetPassword);
 
         txt_createAccountLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        txt_resetPasswordLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, ResetPasswordActivity.class);
                 startActivity(intent);
             }
         });

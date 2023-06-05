@@ -111,7 +111,10 @@ public class MainActivity extends AppCompatActivity {
                 holder.all_posts_txt_description.setText(model.getDescription());
                 holder.all_posts_txt_time.setText("  "+model.getTime());
                 Glide.with(MainActivity.this).asBitmap().load(model.getPost_image()).into(holder.all_posts_img_img);
-                Glide.with(MainActivity.this).asBitmap().load(model.getProfile_image()).into(holder.all_posts_circle_img_profile_img);
+                if(model.getProfile_image()!= null){
+                    Glide.with(MainActivity.this).asBitmap().load(model.getProfile_image()).into(holder.all_posts_circle_img_profile_img);
+                }
+
 
 
 

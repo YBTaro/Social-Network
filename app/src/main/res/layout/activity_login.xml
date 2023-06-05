@@ -81,6 +81,7 @@
         app:layout_constraintTop_toBottomOf="@+id/txt_createAccount" />
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="wrap_content"
         android:layout_height="70dp"
         android:layout_marginTop="15dp"
@@ -114,4 +115,16 @@
             tools:layout_editor_absoluteX="136dp"
             tools:layout_editor_absoluteY="517dp" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/login_txt_resetPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="forget password?"
+        android:textColor="#E91E63"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 </androidx.constraintlayout.widget.ConstraintLayout>

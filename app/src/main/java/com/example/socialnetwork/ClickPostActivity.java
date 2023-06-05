@@ -74,7 +74,10 @@ public class ClickPostActivity extends AppCompatActivity {
                     String description = snapshot.child("description").getValue().toString();
                     String post_img = snapshot.child("post_image").getValue().toString();
                     click_post_txt_description.setText(description);
-                    Glide.with(ClickPostActivity.this).asBitmap().load(post_img).into(click_post_imgView_img);
+                    if(post_img!= null){
+                        Glide.with(ClickPostActivity.this).asBitmap().load(post_img).into(click_post_imgView_img);
+                    }
+
                     postUserId = snapshot.child("uid").getValue().toString();
                     if (postUserId.equals(currentUserId)) {
                         click_post_btn_delete.setVisibility(View.VISIBLE);
@@ -248,7 +251,10 @@ public class ClickPostActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.exists()){
                             holder.all_comments_txt_username.setText(snapshot.child("username").getValue().toString());
-                            Glide.with(ClickPostActivity.this).asBitmap().load(snapshot.child("profile_img").getValue().toString()).into(holder.all_comments_imgView_profile_img);
+                            if(snapshot.child("profile_img").getValue()!= null){
+                                Glide.with(ClickPostActivity.this).asBitmap().load(snapshot.child("profile_img").getValue().toString()).into(holder.all_comments_imgView_profile_img);
+                            }
+
 
                         }
                     }
