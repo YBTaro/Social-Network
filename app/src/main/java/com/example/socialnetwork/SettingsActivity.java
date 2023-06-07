@@ -78,7 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
                     settings_edt_country.setText(country);
                     settings_edt_dob.setText(dob);
                     settings_edt_profile_name.setText(profile_name);
-                    if(profile_img_url!=null){
+                    if(profile_img_url!=null  && !isDestroyed()){
                         Glide.with(SettingsActivity.this).asBitmap().load(profile_img_url).into(settings_profile_img);
                     }
 
@@ -249,7 +249,10 @@ public class SettingsActivity extends AppCompatActivity {
         if(requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK ){
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             crop_img_result_uri = result.getUri();
-            Glide.with(this).asBitmap().load(crop_img_result_uri).into(settings_profile_img);
+            if(!isDestroyed()){
+                Glide.with(this).asBitmap().load(crop_img_result_uri).into(settings_profile_img);
+            }
+
 
 
         }

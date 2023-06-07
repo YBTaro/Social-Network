@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){ // snapshot 在該節點(user_ref.child(mAuth.getUid())) 是否存在
                     // 若是存在，確認是否有需要的資料在
-                    if(snapshot.hasChild("profile_img")){
+                    if(snapshot.hasChild("profile_img") && !isDestroyed()){
                         Glide.with(MainActivity.this).asBitmap().load(snapshot.child("profile_img").getValue().toString()).into(nav_profile_img);
                     }
                     if(snapshot.hasChild("fullname")){
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         // 處理Firebase recycler adapter
         // ->先創一個FirebaseRecyclerOptions(規定的)
         FirebaseRecyclerOptions<Post> options = new FirebaseRecyclerOptions.Builder<Post>()
-                .setQuery(post_ref, Post.class)
+                .setQuery(post_ref.orderByChild("timestamp"), Post.class)
                 .build();
         // ->建立FirebaseRecyclerAdapter
         firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Post, MyViewHolder>(options) {
@@ -110,8 +110,11 @@ public class MainActivity extends AppCompatActivity {
                 holder.all_posts_txt_username.setText((model.getFullname()));
                 holder.all_posts_txt_description.setText(model.getDescription());
                 holder.all_posts_txt_time.setText("  "+model.getTime());
-                Glide.with(MainActivity.this).asBitmap().load(model.getPost_image()).into(holder.all_posts_img_img);
-                if(model.getProfile_image()!= null){
+                if(!isDestroyed()){
+                    Glide.with(MainActivity.this).asBitmap().load(model.getPost_image()).into(holder.all_posts_img_img);
+                }
+
+                if(model.getProfile_image()!= null && !isDestroyed()){
                     Glide.with(MainActivity.this).asBitmap().load(model.getProfile_image()).into(holder.all_posts_circle_img_profile_img);
                 }
 
@@ -130,11 +133,14 @@ public class MainActivity extends AppCompatActivity {
                 });
 
                 // 這篇貼文在 Firebase 有多少 comment
-                post_ref.child(post_key).child("comment").addValueEventListener(new ValueEventListener() {
+                post_ref.child(post_key).addValueEventListener(new ValueEventListener() { // 原本是寫 post_ref.child(post_key).child("comment").addValueEventListener，會一直閃退，原因推測是因為在沒有comment，或是從 1 刪到 0 comment時，comment 節點不存在，會監聽失敗
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if(snapshot.exists()){
-                            holder.all_posts_txt_numOfComments.setText(String.valueOf(snapshot.getChildrenCount()));
+                        if(snapshot.child("comment")!= null){
+                            holder.all_posts_txt_numOfComments.setText(String.valueOf(snapshot.child("comment").getChildrenCount()));
+//                            Toast.makeText(MainActivity.this, String.valueOf(snapshot.child("comment").getChildrenCount()), Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(MainActivity.this, "null", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -267,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseRecyclerAdapter.notifyDataSetChanged(); // 可以解決返回頁面時出現的錯誤
 
 
+
     }
 
     @Override
@@ -275,7 +282,6 @@ public class MainActivity extends AppCompatActivity {
         firebaseRecyclerAdapter.stopListening();
 
     }
-
 
     private void initViews(){
         navigationView = findViewById(R.id.navView);
@@ -314,6 +320,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.nav_profile:
                         Intent profile_intent = new Intent(MainActivity.this, ProfileActivity.class);
+                        profile_intent.putExtra("visit_user_id",mAuth.getCurrentUser().getUid());
                         startActivity(profile_intent);
                         break;
                     case R.id.nav_home:

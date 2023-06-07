@@ -39,6 +39,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -74,7 +75,7 @@ public class ClickPostActivity extends AppCompatActivity {
                     String description = snapshot.child("description").getValue().toString();
                     String post_img = snapshot.child("post_image").getValue().toString();
                     click_post_txt_description.setText(description);
-                    if(post_img!= null){
+                    if(post_img!= null  && !isDestroyed()){
                         Glide.with(ClickPostActivity.this).asBitmap().load(post_img).into(click_post_imgView_img);
                     }
 
@@ -180,10 +181,13 @@ public class ClickPostActivity extends AppCompatActivity {
                             if(snapshot.exists()){
                                 String username = snapshot.child("username").getValue().toString();
                                 Calendar calendar = Calendar.getInstance();
+                                Date current_time = calendar.getTime();
                                 SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
-                                final String s_date = date.format(calendar.getTime());
+                                final String s_date = date.format(current_time);
                                 SimpleDateFormat time = new SimpleDateFormat("HH-mm-ss");
-                                final String s_time = time.format(calendar.getTime());
+                                final String s_time = time.format(current_time);
+                                SimpleDateFormat timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+                                final String s_timestamp = timestamp.format(current_time);
 
                                 final String randoKey = currentUserId + s_date + s_time;
                                 HashMap hashMap = new HashMap<>();
@@ -192,6 +196,7 @@ public class ClickPostActivity extends AppCompatActivity {
                                 hashMap.put("date", s_date);
                                 hashMap.put("time", s_time);
                                 hashMap.put("username", username);
+                                hashMap.put("timestamp", s_timestamp);
                                 click_post_ref.child("comment").child(randoKey).updateChildren(hashMap)  // setValue，取代原本資料，updateChildren只更新部分資料
                                         .addOnCompleteListener(new OnCompleteListener() {
                                             @Override
@@ -220,7 +225,7 @@ public class ClickPostActivity extends AppCompatActivity {
         });
 
         FirebaseRecyclerOptions<Comments> options = new FirebaseRecyclerOptions.Builder<Comments>()
-                .setQuery(comments_ref, Comments.class)
+                .setQuery(comments_ref.orderByChild("timestamp"), Comments.class)
                 .build();
 
         firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Comments, MyViewHolder>(options) {
@@ -251,7 +256,7 @@ public class ClickPostActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.exists()){
                             holder.all_comments_txt_username.setText(snapshot.child("username").getValue().toString());
-                            if(snapshot.child("profile_img").getValue()!= null){
+                            if(snapshot.child("profile_img").getValue()!= null && !isDestroyed()){
                                 Glide.with(ClickPostActivity.this).asBitmap().load(snapshot.child("profile_img").getValue().toString()).into(holder.all_comments_imgView_profile_img);
                             }
 
@@ -334,4 +339,5 @@ public class ClickPostActivity extends AppCompatActivity {
         super.onStart();
         firebaseRecyclerAdapter.startListening();
     }
+
 }

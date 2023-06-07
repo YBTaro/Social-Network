@@ -28,6 +28,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -35,6 +36,7 @@ import com.google.firebase.storage.UploadTask;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 public class PostActivity extends AppCompatActivity {
@@ -83,10 +85,14 @@ public class PostActivity extends AppCompatActivity {
 
             private void storeImgToFirebase(){
                 Calendar calendar = Calendar.getInstance();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMMM-yyyy");
-                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
-                String currentDate = dateFormat.format(calendar.getTime());
-                String currentTime = timeFormat.format(calendar.getTime());
+                Date current_time = calendar.getTime();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+                SimpleDateFormat timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+                String currentDate = dateFormat.format(current_time);
+                String currentTime = timeFormat.format(current_time);
+                String current_timestamp = timestamp.format(current_time);
+
 
                 // 檔案名稱：原檔案uri最後片段的名稱(原檔名)+日期+時間
                 StorageReference filePath = postImgRef.child(img_uri.getLastPathSegment()+currentDate+"-"+currentTime+".jpg");
@@ -98,7 +104,7 @@ public class PostActivity extends AppCompatActivity {
                             task.getResult().getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
-                                    sendDataToFirebase(currentDate,currentTime, uri.toString());
+                                    sendDataToFirebase(currentDate,currentTime,current_timestamp, uri.toString());
                                 }
                             });
 
@@ -109,7 +115,7 @@ public class PostActivity extends AppCompatActivity {
                 });
             }
 
-            private void sendDataToFirebase(String date, String time, String downloadUrl){
+            private void sendDataToFirebase(String date, String time, String timestamp, String downloadUrl){
 
 
                 userRef.addValueEventListener(new ValueEventListener() {
@@ -126,6 +132,7 @@ public class PostActivity extends AppCompatActivity {
                             postMap.put("uid", mAuth.getCurrentUser().getUid());
                             postMap.put("date", date);
                             postMap.put("time", time);
+                            postMap.put("timestamp", timestamp);
                             postMap.put("description",edt_postDescription.getText().toString());
                             postMap.put("post_image", downloadUrl);
 

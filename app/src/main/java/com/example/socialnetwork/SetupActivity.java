@@ -119,7 +119,7 @@ public class SetupActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
-                    if(snapshot.hasChild("profile_img")){
+                    if(snapshot.hasChild("profile_img")  && !isDestroyed()){
                         Glide.with(SetupActivity.this).asBitmap().load(snapshot.child("profile_img").getValue()).into(selfie);
                     }
                 }

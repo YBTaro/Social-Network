@@ -7,6 +7,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.transition.TransitionManager;
 import android.view.LayoutInflater;
@@ -50,7 +51,10 @@ public class FindFriendsActivity extends AppCompatActivity {
             protected void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull FindFriends model) {
                 holder.card_txt_fullname.setText(model.getFullname());
                 holder.card_txt_status.setText(model.getStatus());
-                Glide.with(FindFriendsActivity.this).asBitmap().load(model.getProfile_img()).into(holder.card_profile_img);
+                if(model.getProfile_img()!= null){
+                    Glide.with(FindFriendsActivity.this).asBitmap().load(model.getProfile_img()).into(holder.card_profile_img);
+                }
+
 
                 TransitionManager.beginDelayedTransition(holder.find_friends_card);
 
@@ -77,6 +81,16 @@ public class FindFriendsActivity extends AppCompatActivity {
                         model.isExpanded = false;
                         notifyItemChanged(holder.getBindingAdapterPosition());
 
+                    }
+                });
+
+                holder.find_friends_card.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String friend_id = getRef(holder.getBindingAdapterPosition()).getKey();
+                        Intent intent = new Intent(FindFriendsActivity.this, ProfileActivity.class);
+                        intent.putExtra("visit_user_id", friend_id);
+                        startActivity(intent);
                     }
                 });
 
