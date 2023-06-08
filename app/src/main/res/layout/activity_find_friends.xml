@@ -56,15 +56,48 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/find_friends_recView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/find_friends_layout"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/find_friends_recView"
+        android:id="@+id/find_friends_friends_request_layout"
+        android:padding="20dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your friend requests : "
+            android:textColor="#ffffff"
+            android:textSize="18dp"
+            android:id="@+id/find_friends_friends_request_text"/>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/find_friends_friends_request_text">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/find_friends_friends_request_recView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            </androidx.recyclerview.widget.RecyclerView>
+        </ScrollView>
+
+    </RelativeLayout>
+
 
 
 </RelativeLayout>

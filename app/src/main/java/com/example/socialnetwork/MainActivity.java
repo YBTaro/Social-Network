@@ -107,7 +107,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull Post model) {
                 holder.all_posts_txt_date.setText("  "+model.getDate());
-                holder.all_posts_txt_username.setText((model.getFullname()));
+//                holder.all_posts_txt_username.setText(model.getFullname()); 改成下面寫法同步更新ID
+                String poster_id = model.getUid();
+                user_ref.child(poster_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists()){
+                            holder.all_posts_txt_username.setText(snapshot.child("fullname").getValue().toString());
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
                 holder.all_posts_txt_description.setText(model.getDescription());
                 holder.all_posts_txt_time.setText("  "+model.getTime());
                 if(!isDestroyed()){

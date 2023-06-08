@@ -54,17 +54,19 @@ public class ProfileActivity extends AppCompatActivity {
                         profile_btn_addFriend.setVisibility(View.GONE);
                     } else {
                         String status = "";
-                        if (snapshot.child("friends").child(current_user_id).exists()) {
-                            status = snapshot.child("friends").child(current_user_id).getValue().toString();
+                        if (snapshot.child("friends").child(current_user_id).child("status").exists()) {
+                            status = snapshot.child("friends").child(current_user_id).child("status").getValue().toString();
                         }
 
-                        DatabaseReference visit_user_friends_ref = user_ref.child("friends").child(current_user_id);
+                        DatabaseReference visit_user_friends_ref = user_ref.child("friends").child(current_user_id).child("status");
                         switch (status) {
                             case "friend":
                                 profile_btn_addFriend.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
+                                        // 兩人彼此好友都刪除
                                         visit_user_friends_ref.removeValue();
+                                        FirebaseDatabase.getInstance().getReference().child("Users").child(current_user_id).child("friends").child(visit_user_id).child("status").removeValue();
                                     }
                                 });
                                 profile_btn_addFriend.setText("Delete Friend");
