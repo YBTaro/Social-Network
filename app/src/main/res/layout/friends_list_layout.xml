@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 填補剩餘空間的設計方式，可以用LinearLayout + weight -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:background="@drawable/friend_list_background"
+    android:layout_marginHorizontal="10dp"
+    android:layout_marginTop="10dp"
+    android:id="@+id/friends_list_layout">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/friends_imgView_profile"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="20dp"
+        android:src="@drawable/profile"
+        android:layout_gravity="center_vertical"/>
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_margin="10dp">
+        <TextView
+            android:id="@+id/friends_txt_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="username"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:textColor="#ffffff" />
+
+        <TextView
+            android:id="@+id/friends_txt_status"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="10dp"
+            android:text="description"
+            android:textColor="#A6A5A5"
+            android:layout_below="@id/friends_txt_username"/>
+    </RelativeLayout>
+
+
+
+</LinearLayout>

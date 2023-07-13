@@ -30,6 +30,35 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <GridLayout
+                android:id="@+id/gridLayout"
+                android:layout_marginTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:rowCount="1"
+                app:layout_constraintTop_toBottomOf="@id/profile_txt_relationship">
+
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="fill"
+                    android:layout_margin="10dp"
+                    android:text="0 Posts"
+                    android:textColor="#0A113C"
+                    android:background="#51D8AD" />
+
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="fill"
+                    android:layout_margin="10dp"
+                    android:text="0 friends"
+                    android:textColor="#0A113C"
+                    android:background="#51D8AD" />
+
+            </GridLayout>
+
             <TextView
                 android:id="@+id/profile_txt_name"
                 android:layout_width="wrap_content"
@@ -123,17 +152,15 @@
                 android:id="@+id/profile_btn_addFriend"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Add Friend"
-                android:background="@drawable/button"
-                android:layout_marginTop="25dp"
-                tools:layout_editor_absoluteX="158dp"
-                tools:layout_editor_absoluteY="798dp"
-                android:textSize="18dp"
                 android:layout_marginHorizontal="15dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/button"
+                android:text="Add Friend"
                 android:textColor="#ffffff"
+                android:textSize="18dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/profile_txt_relationship"/>
+                app:layout_constraintTop_toBottomOf="@id/gridLayout" />
 
 
 

@@ -60,8 +60,11 @@ public class FindFriendsActivity extends AppCompatActivity {
             protected void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull FindFriends model) {
                 holder.card_txt_fullname.setText(model.getFullname());
                 holder.card_txt_status.setText(model.getStatus());
+
                 if(model.getProfile_img()!= null){
                     Glide.with(FindFriendsActivity.this).asBitmap().load(model.getProfile_img()).into(holder.card_profile_img);
+                }else{ // 要加這個不然其他recyclerView在展開時會影響到預設的照片
+                    holder.card_profile_img.setImageResource(R.drawable.profile);
                 }
 
 
