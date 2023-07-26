@@ -86,7 +86,7 @@ public class PostActivity extends AppCompatActivity {
             private void storeImgToFirebase(){
                 Calendar calendar = Calendar.getInstance();
                 Date current_time = calendar.getTime();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM-dd");
                 SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
                 SimpleDateFormat timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
                 String currentDate = dateFormat.format(current_time);

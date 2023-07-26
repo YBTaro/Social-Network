@@ -35,7 +35,8 @@ public class FriendsActivity extends AppCompatActivity {
     private FirebaseRecyclerAdapter<FriendsRequests, MyViewHolder> firebaseRecyclerAdapter;  // 借用FriendsRequest class
     private FirebaseRecyclerOptions<FriendsRequests> firebaseRecyclerOptions;
     private DatabaseReference users_ref;
-    private String current_user_id;
+    private String current_user_id, friends_of_whom;
+    private TextView textView;
 
 
     @Override
@@ -44,7 +45,7 @@ public class FriendsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_friends);
         initViews();
         firebaseRecyclerOptions = new FirebaseRecyclerOptions.Builder<FriendsRequests>()
-                .setQuery(users_ref.child(current_user_id).child("friends").orderByChild("status").equalTo("friend"), FriendsRequests.class)
+                .setQuery(users_ref.child(friends_of_whom).child("friends").orderByChild("status").equalTo("friend"), FriendsRequests.class)
                 .build();
 
         firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<FriendsRequests, MyViewHolder>(firebaseRecyclerOptions) {
@@ -125,17 +126,35 @@ public class FriendsActivity extends AppCompatActivity {
     }
 
     private void initViews(){
-        mToolbar = findViewById(R.id.friends_toolbar);
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle("Friends");
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        users_ref = FirebaseDatabase.getInstance().getReference().child("Users");
 
         recyclerView = findViewById(R.id.friends_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        textView = findViewById(R.id.TextView0);
 
         current_user_id = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        users_ref = FirebaseDatabase.getInstance().getReference().child("Users");
+        friends_of_whom = getIntent().getExtras().get("friends_of_whom").toString();
+
+
+        mToolbar = findViewById(R.id.friends_toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        users_ref.child(friends_of_whom).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.child("fullname").exists()){
+                    getSupportActionBar().setTitle(snapshot.child("fullname").getValue().toString() + "'s Friends");
+                    textView.setText(snapshot.child("fullname").getValue().toString() + "'s Friends");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{

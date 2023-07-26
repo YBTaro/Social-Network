@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -25,9 +26,9 @@ public class ProfileActivity extends AppCompatActivity {
     private CircleImageView profile_img_profile_img;
     private TextView profile_txt_name, profile_txt_username, profile_txt_status, profile_txt_country, profile_txt_dob, profile_txt_gender, profile_txt_relationship;
     private FirebaseAuth mAuth;
-    private DatabaseReference user_ref;
+    private DatabaseReference user_ref, posts_ref;
     private Toolbar profile_toolbar;
-    private Button profile_btn_addFriend;
+    private Button profile_btn_addFriend, profile_btn_no_friends, profile_btn_no_posts;
     private String visit_user_id, current_user_id;
 
     @Override
@@ -46,6 +47,22 @@ public class ProfileActivity extends AppCompatActivity {
                     profile_txt_dob.setText("Birthday: " + snapshot.child("dob").getValue().toString());
                     profile_txt_gender.setText("Gender: " + snapshot.child("gender").getValue().toString());
                     profile_txt_relationship.setText("Relationship status: " + snapshot.child("relationshipstatus").getValue().toString());
+                    int numOfFriends = 0;
+                    for(DataSnapshot friend : snapshot.child("friends").getChildren()){
+                        if(friend.child("status").getValue().toString().equals("friend")){
+                            numOfFriends+=1;
+                        }
+                    }
+                    profile_btn_no_friends.setText(numOfFriends + " Friends");
+                    profile_btn_no_friends.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(ProfileActivity.this, FriendsActivity.class);
+                            intent.putExtra("friends_of_whom", visit_user_id);
+                            startActivity(intent);
+                        }
+                    });
+
                     if (snapshot.child("profile_img").getValue() != null && !isDestroyed()) { //  && !isDestroyed() 就不會閃退
                         Glide.with(ProfileActivity.this).asBitmap().load(snapshot.child("profile_img").getValue().toString()).into(profile_img_profile_img);
                     }
@@ -107,6 +124,28 @@ public class ProfileActivity extends AppCompatActivity {
 
             }
         });
+
+        posts_ref.orderByChild("uid").equalTo(visit_user_id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                profile_btn_no_posts.setText(snapshot.getChildrenCount()+" Posts");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        profile_btn_no_posts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, MyPostActivity.class);
+                intent.putExtra("posts_of_whom", visit_user_id);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void initViews() {
@@ -119,6 +158,8 @@ public class ProfileActivity extends AppCompatActivity {
         profile_txt_gender = findViewById(R.id.profile_txt_gender);
         profile_txt_relationship = findViewById(R.id.profile_txt_relationship);
         profile_btn_addFriend = findViewById(R.id.profile_btn_addFriend);
+        profile_btn_no_posts = findViewById(R.id.profile_btn_no_posts);
+        profile_btn_no_friends = findViewById(R.id.profile_btn_no_friends);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -131,6 +172,7 @@ public class ProfileActivity extends AppCompatActivity {
         visit_user_id = getIntent().getExtras().get("visit_user_id").toString();
         current_user_id = mAuth.getCurrentUser().getUid();
         user_ref = FirebaseDatabase.getInstance().getReference().child("Users").child(visit_user_id);
+        posts_ref = FirebaseDatabase.getInstance().getReference().child("Posts");
 
 
     }

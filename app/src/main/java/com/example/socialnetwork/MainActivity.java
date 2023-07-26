@@ -343,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.nav_friends:
                         Intent friends_intent = new Intent(MainActivity.this, FriendsActivity.class);
+                        friends_intent.putExtra("friends_of_whom", mAuth.getCurrentUser().getUid());
                         startActivity(friends_intent);
                         break;
                     case R.id.nav_find_friends:

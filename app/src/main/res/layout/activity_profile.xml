@@ -40,22 +40,24 @@
                 app:layout_constraintTop_toBottomOf="@id/profile_txt_relationship">
 
                 <Button
+                    android:id="@+id/profile_btn_no_posts"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_gravity="fill"
                     android:layout_margin="10dp"
+                    android:background="#51D8AD"
                     android:text="0 Posts"
-                    android:textColor="#0A113C"
-                    android:background="#51D8AD" />
+                    android:textColor="#0A113C" />
 
                 <Button
+                    android:id="@+id/profile_btn_no_friends"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_gravity="fill"
                     android:layout_margin="10dp"
+                    android:background="#51D8AD"
                     android:text="0 friends"
-                    android:textColor="#0A113C"
-                    android:background="#51D8AD" />
+                    android:textColor="#0A113C" />
 
             </GridLayout>
 
