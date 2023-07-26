@@ -264,6 +264,11 @@ public class MainActivity extends AppCompatActivity {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
+        }else if(!mAuth.getCurrentUser().isEmailVerified()){
+            Intent intent = new Intent(MainActivity.this, VerifyEmailActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         }else{ //使用者有登入，確認是否已經有profile
             final String user_id = mAuth.getCurrentUser().getUid();
             user_ref.addValueEventListener(new ValueEventListener() {
@@ -286,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
 
         firebaseRecyclerAdapter.startListening();
         firebaseRecyclerAdapter.notifyDataSetChanged(); // 可以解決返回頁面時出現的錯誤
+//        Toast.makeText(this, String.valueOf(!mAuth.getCurrentUser().isEmailVerified()), Toast.LENGTH_SHORT).show();
 
 
 
